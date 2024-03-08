@@ -50,7 +50,7 @@ Note: ICM SA8155P might has differrent solutions, which is still in developing.
 
 ![Hardware Block Diagram](./images/hardware_block_diagram.png)
 
-- Power of SRV360 cameras are controlled by FICM-MCU's enbale wire
+- Power of SRV360 cameras are controlled by FICM-MCU's **enbale** wire.
 - Once the system chooses to close the power of SRV360 cameras, the power of de-serializer keeps the same.
 
 ### 2.4 Regulation
@@ -69,14 +69,16 @@ Power of SRV360 cameras should be **power-off** while **ALL** of the **Pre-condi
 
 #### 3.1.2 Pre-conditions
 
-- [CAN Signal: SysPwrMd](#syspwrmd) == RUN
-<!-- - [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) > [Internal Signal: SRV360AppAvailableSpeed](#SRV360AppAvailableSpeed) -->
+<!-- - [CAN Signal: SysPwrMd](#syspwrmd) == RUN -->
+<!-- - [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) > [Internal Signal: SRV360AppAvailableSpeedSetting](#SRV360AppAvailableSpeedSetting) -->
+
+- [SystemMode: HeadunitPowerMode](#headunitpowermode) == _`running`_
 - [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) > [Internal Signal: EES_SRV360CameraPowerOffSpeed](#EES_SRV360CameraPowerOffSpeed)
-- [Internal Signal: SDCardPluginStatus](#SDCardPluginStatus) == SD_CARD_NOT_PLUG_IN (if applicable)
+- [Internal Signal: DvrSDCardPluginStatus](#DvrSDCardPluginStatus) == SD_CARD_NOT_PLUG_IN (if applicable)
 
 #### 3.1.3 Use Cases
 
-- [UC_EES_SRV360_000: System sets SRV360 Cameras Power OFF](#uc_ees_srv360_000-system-sets-srv360-cameras-power-off)
+- [UC_EES_SRV360_000: Headunit sets SRV360 Cameras Power OFF](#uc_ees_srv360_000-system-sets-srv360-cameras-power-off)
 
 #### 3.1.4 Post-conditions
 
@@ -94,14 +96,13 @@ Power of SRV360 cameras should be **power-on** while **ANY** of the **Pre-condit
 
 #### 3.2.2 Pre-conditions
 
-<!-- - [CAN Signal: SysPwrMd](#syspwrmd) == RUN -->
-
-- [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) < ([Internal Signal: EES_SRV360CameraPowerOffSpeed](#EES_SRV360CameraPowerOffSpeed) + [Internal Signal: EES_SRV360CamperPowerOnSpeedOffset](#EES_SRV360CamperPowerOnSpeedOffset))
-- [Internal Signal: SDCardPluginStatus](#SDCardPluginStatus) == SD_CARD_PLUG_IN (if applicable)
+- [SystemMode: HeadunitPowerMode](#headunitpowermode) == _`running`_
+- [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) < ([Internal Signal: EES_SRV360CameraPowerOffSpeed](#EES_SRV360CameraPowerOffSpeed) + [Internal Signal: EES_SRV360CameraPowerOnSpeedOffset](#EES_SRV360CameraPowerOnSpeedOffset))
+- [Internal Signal: DvrSDCardPluginStatus](#DvrSDCardPluginStatus) == SD_CARD_PLUG_IN (if applicable)
 
 #### 3.2.3 Use Cases
 
-- [UC_EES_SRV360_001: System sets SRV360 Cameras Power ON](#uc_ees_srv360_001-system-sets-srv360-cameras-power-on)
+- [UC_EES_SRV360_001: Headunit sets SRV360 Cameras Power ON](#uc_ees_srv360_001-system-sets-srv360-cameras-power-on)
 
 #### 3.2.4 Post-conditions
 
@@ -113,22 +114,144 @@ N/A
 
 ## 4 Entities
 
-### SysPwrMd
+### HeadunitPowerMode
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV000",
+  "EntityName": "HeadunitPowerMode",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "shutdown": 0, "suspendToRAM": 1, "running": 2 },
+  "InitialValue": "shutdown",
+  "Comments": ""
+}
+```
 
 ### VehSpdAvgDrvn
 
-### SDCardPluginStatus
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV100",
+  "EntityName": "VehSpdAvgDrvn",
+  "EntityType": "",
+  "DataType": "float",
+  "ValueRange": "(0 - 32767 * 0.015625) km/h",
+  "InitialValue": 0,
+  "Comments": "Vehicle average speed received from CAN bus."
+}
+```
+
+### DvrSDCardPluginStatus
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV200",
+  "EntityName": "DvrSDCardPluginStatus",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "not-plugin": 0, "plugin": 1 },
+  "InitialValue": "not-plugin",
+  "Comments": "SD Card just means the memory medium for DVR video storage, it can be TF card or USB stick."
+}
+```
 
 ### SRV360CameraPowerStatus
 
-### SRV360AppAvailableSpeed
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV201",
+  "EntityName": "SRV360CameraPowerStatus",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "OFF": 0, "ON": 1 },
+  "InitialValue": "shutdown",
+  "Comments": ""
+}
+```
 
-### EES_SRV360CamperPowerOnSpeedOffset
+### SRV360AppAvailableSpeedSetting
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV202",
+  "EntityName": "SRV360AppAvailableSpeedSetting",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "15km/h": 0, "25km/h": 1, "35km/h": 2 },
+  "InitialValue": "15km/h",
+  "Comments": ""
+}
+```
+
+### EES_SRV360CameraPowerOnSpeedOffset
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV203",
+  "EntityName": "EES_SRV360CameraPowerOnSpeedOffset",
+  "EntityType": "",
+  "DataType": "int",
+  "ValueRange": "(0 - 10) km/h",
+  "InitialValue": 4,
+  "Comments": "Internal value hard-coded in application."
+}
+```
 
 ### EES_SRV360CameraPowerOffSpeed
 
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV204",
+  "EntityName": "EES_SRV360CameraPowerOffSpeed",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "50km/h": "15km/h", "60km/h": "25km/h", "70km/h": "35km/h" },
+  "InitialValue": 4,
+  "Comments": "Internal value hard-coded in application."
+}
+```
+
 ## 5 Use Cases
 
-### UC_EES_SRV360_000: System sets SRV360 Cameras Power OFF
+### 5.1 Use Case Models
 
-### UC_EES_SRV360_001: System sets SRV360 Cameras Power ON
+#### UC_EES_SRV360_000: Headunit sets SRV360 Cameras Power OFF
+
+![UC_EES_SRV360_000](./images/UC_EES_SRV360_000.png)
+
+#### UC_EES_SRV360_001: Headunit sets SRV360 Cameras Power ON
+
+![UC_EES_SRV360_001](./images/UC_EES_SRV360_001.png)
+
+### 5.2 Business Rules
+
+#### Arbitriation Table - 1
+
+- **Inputs:**
+  - [HeadunitPowerMode](#headunitpowermode)
+  - [VehSpdAvgDrvn](#vehspdavgdrvn)
+  - [DvrSDCardPluginStatus](#dvrsdcardpluginstatus)
+- **Outputs:**
+  - [SRV360CameraPowerStatus](#srv360camerapowerstatus)
+
+| Case No. | [Headunit<br>PowerMode](#headunitpowermode) |                                                                                          [VehSpd<br>AvgDrvn](#vehspdavgdrvn)                                                                                           | [DvrSDCard<br>PluginStatus](#dvrsdcardpluginstatus) | [SRV360Camera<br>PowerStatus](#srv360camerapowerstatus) |
+| :------- | :-----------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------: | :-----------------------------------------------------: |
+| A        |                  shutdown                   |                                                                                                           X                                                                                                            |                          X                          |                         **OFF**                         |
+| B        |                suspendToRAM                 |                                                                                                           X                                                                                                            |                          X                          |                         **OFF**                         |
+| C        |                   running                   | <= [EES_SRV360CameraPowerOffSpeed](#ees_srv360camerapoweroffspeed) && <br>> ([SRV360AppAvailableSpeedSetting](#srv360appavailablespeedsetting) + [EES_SRV360CameraPowerOffSpeed](#ees_srv360camerapoweronspeedoffset)) |                          X                          |                         **ON**                          |
+| D        |                   running                   |                                                                           > [EES_SRV360CameraPowerOffSpeed](#ees_srv360camerapoweroffspeed)                                                                            |                     not-plugin                      |                         **OFF**                         |
+| E        |                   running                   |                                                                           > [EES_SRV360CameraPowerOffSpeed](#ees_srv360camerapoweroffspeed)                                                                            |                       plugin                        |                         **ON**                          |
+| F        |                   running                   |                                     <= ([SRV360AppAvailableSpeedSetting](#srv360appavailablespeedsetting) + [EES_SRV360CameraPowerOffSpeed](#ees_srv360camerapoweronspeedoffset))                                      |                          X                          |                         **ON**                          |
+
+### 5.3 Prototype Demos
+
+## 6 System Realization
+
+### 6.1 Analysis Models
+
+[UC_EES_SRV360_000](#uc_ees_srv360_000-headunit-sets-srv360-cameras-power-off)
+
+### 6.2 Component Deployment Strategy
+
+### 6.3 System Performance Indicators
