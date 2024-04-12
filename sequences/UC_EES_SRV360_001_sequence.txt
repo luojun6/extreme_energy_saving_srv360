@@ -1,0 +1,61 @@
+title UC_EES_SRV360_001: Headunit sets SRV360 Cameras Power ON
+
+actor #6495ED user
+boundary VehicleNetwork #6495ED
+control Srv360CameraPM #gold
+entity DvrSDCardPluginStatus #gold
+entity SRV360CameraPowerStatus #gold
+
+==Notice: This diagram is just to manifest a common vehicle connected headunit authentication process, the actual implementation might be different.==#F9E79F
+
+==v1.0: First drafted.==#F9E79F
+
+activate user #6495ED
+
+loop #6495ED
+
+abox over VehicleNetwork, SRV360CameraPowerStatus #lightgreen: UC_EES_SRV360_000_RE001_POWER_OFF_CAMERAS_GRACEFULLY completed
+
+activate VehicleNetwork #6495ED
+activate Srv360CameraPM #gold
+activate DvrSDCardPluginStatus #lightgray
+activate SRV360CameraPowerStatus #lightgray
+
+VehicleNetwork->Srv360CameraPM: [CAN] VehSpdAvgDrvn
+Srv360CameraPM->Srv360CameraPM: check VehSpdAvgDrvn
+
+
+alt #gold VehSpdAvgDrvn > (SRV360AppAvailableSpeedSetting + EES_SRV360CameraPowerOffSpeed)
+
+==UC_EES_SRV360_001_RE002_READT_TO_POWER_ON_CAMERAS_IN_LOW_SPEED==#lightblue
+
+user->VehicleNetwork: slow down speed
+
+else VehSpdAvgDrvn <= (SRV360AppAvailableSpeedSetting + EES_SRV360CameraPowerOffSpeed)
+
+Srv360CameraPM->SRV360CameraPowerStatus: powerOn
+deactivate SRV360CameraPowerStatus
+activate SRV360CameraPowerStatus #gold
+
+==UC_EES_SRV360_001_RE000_POWER_ON_CAMERAS_IN_LOW_SPEED==#lightblue
+
+end
+
+
+abox over VehicleNetwork, SRV360CameraPowerStatus #lightgreen: UC_EES_SRV360_000_RE001_POWER_OFF_CAMERAS_GRACEFULLY completed
+
+deactivate SRV360CameraPowerStatus
+activate SRV360CameraPowerStatus #lightgray
+
+user-> DvrSDCardPluginStatus:  insert SD Card
+deactivate DvrSDCardPluginStatus
+activate DvrSDCardPluginStatus #gold
+DvrSDCardPluginStatus-->Srv360CameraPM: notify "plugin"
+Srv360CameraPM->SRV360CameraPowerStatus: powerOn
+deactivate SRV360CameraPowerStatus
+activate SRV360CameraPowerStatus #gold
+
+==UC_EES_SRV360_001_RE001_POWER_ON_WHILE_SD_CARD_PLUGIN==#lightblue
+
+end
+

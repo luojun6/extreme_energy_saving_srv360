@@ -1,0 +1,99 @@
+title UC_EES_SRV360_000: Headunit sets SRV360 Cameras Power OFF
+
+actor #6495ED user
+boundary VehicleNetwork #6495ED
+control Srv360CameraPM #gold
+entity DvrSDCardPluginStatus #gold
+entity SRV360CameraPowerStatus #gold
+entity EES_SRV360CameraPowerOffTimerStatus #gold
+
+==Notice: This diagram is just to manifest a common vehicle connected headunit authentication process, the actual implementation might be different.==#F9E79F
+
+==v1.0: First drafted.==#F9E79F
+
+activate user #6495ED
+
+user->VehicleNetwork: access
+
+abox over VehicleNetwork, EES_SRV360CameraPowerOffTimerStatus #lightblue: Vehicle System Power Mode == RUN & User has accessed into vehicle
+
+activate VehicleNetwork #6495ED
+activate Srv360CameraPM #gold
+
+entryspacing 0.5
+
+Srv360CameraPM->DvrSDCardPluginStatus: init
+activate DvrSDCardPluginStatus #lightgray
+Srv360CameraPM->SRV360CameraPowerStatus: init
+activate SRV360CameraPowerStatus #gold
+Srv360CameraPM->EES_SRV360CameraPowerOffTimerStatus:init
+activate EES_SRV360CameraPowerOffTimerStatus #gold
+
+Srv360CameraPM->DvrSDCardPluginStatus: get
+DvrSDCardPluginStatus->Srv360CameraPM: return "not-plugin:
+Srv360CameraPM->DvrSDCardPluginStatus: subscribe
+
+user->DvrSDCardPluginStatus: insert SD Card
+deactivate DvrSDCardPluginStatus
+activate DvrSDCardPluginStatus #gold
+DvrSDCardPluginStatus-->Srv360CameraPM: notify "plugin"
+
+
+
+user->VehicleNetwork: accelerate speed
+
+entryspacing 1
+
+loop #6495ED
+
+entryspacing 1
+
+VehicleNetwork->Srv360CameraPM: [CAN] VehSpdAvgDrvn
+
+Srv360CameraPM->Srv360CameraPM: drop VehSpdAvgDrvn
+
+==UC_EES_SRV360_000_RE003_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_SD_CARD_PLUGIN==#lightblue
+
+
+
+
+
+user->DvrSDCardPluginStatus: pull out SD Card
+deactivate DvrSDCardPluginStatus
+activate DvrSDCardPluginStatus #lightgray
+
+DvrSDCardPluginStatus-->Srv360CameraPM: notify "non-plugin"
+
+Srv360CameraPM->Srv360CameraPM: check VehSpdAvgDrvn
+
+alt #C70039 EES_SRV360CameraPowerOffTimerStatus == standby
+
+alt #gold VehSpdAvgDrvn <= EES_SRV360CameraPowerOffSpeed
+
+==UC_EES_SRV360_000_RE000_READY_TO_POWER_OFF_CAMERAS==#lightblue
+
+else ehSpdAvgDrvn > EES_SRV360CameraPowerOffSpeed
+
+Srv360CameraPM->EES_SRV360CameraPowerOffTimerStatus: activate
+deactivate EES_SRV360CameraPowerOffTimerStatus
+activate EES_SRV360CameraPowerOffTimerStatus #C70039
+Srv360CameraPM->SRV360CameraPowerStatus: powerOff
+deactivate SRV360CameraPowerStatus
+activate SRV360CameraPowerStatus #gray
+
+==UC_EES_SRV360_000_RE001_POWER_OFF_CAMERAS_GRACEFULLY==#lightblue
+
+end
+
+else EES_SRV360CameraPowerOffTimerStatus = activated
+
+
+alt #gold VehSpdAvgDrvn > EES_SRV360CameraPowerOffSpeed
+==UC_EES_SRV360_000_RE002_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_TIMER_ACTIVATED==#lightblue
+end
+end
+end
+
+
+
+
