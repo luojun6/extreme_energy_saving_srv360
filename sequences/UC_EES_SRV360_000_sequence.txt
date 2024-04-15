@@ -87,6 +87,10 @@ end
 
 else EES_SRV360CameraPowerOffTimerStatus = activated
 
+abox over VehicleNetwork, EES_SRV360CameraPowerOffTimerStatus #lightgreen: UC_EES_SRV360_001_RE000_POWER_ON_CAMERAS_IN_LOW_SPEED completed
+
+deactivate SRV360CameraPowerStatus
+activate SRV360CameraPowerStatus #gold
 
 alt #gold VehSpdAvgDrvn > EES_SRV360CameraPowerOffSpeed
 ==UC_EES_SRV360_000_RE002_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_TIMER_ACTIVATED==#lightblue

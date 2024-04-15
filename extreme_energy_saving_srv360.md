@@ -2,9 +2,10 @@
 
 ## 0 Legend
 
-| Version | Description     | Date       | Author |
-| ------- | --------------- | ---------- | ------ |
-| 1.0     | First released. | 2024-04-12 | 罗均   |
+| Version | Description                                       | Date       | Author |
+| ------- | ------------------------------------------------- | ---------- | ------ |
+| 1.0     | First released.                                   | 2024-04-12 | 罗均   |
+| 1.1     | Revised [Interoperability](#79-interoperability). | 2024-04-15 | 罗均   |
 
 ## 1 Overview
 
@@ -264,7 +265,7 @@ N/A
   "ValueRange": { "50km/h": "15km/h", "60km/h": "25km/h", "70km/h": "35km/h" },
   "InitialValue": "50km/h",
   "ExceptionValue": "50km/h",
-  "Comments": "Internal value hard-coded in application."
+  "Comments": "Configurable value in application."
 }
 ```
 
@@ -283,17 +284,47 @@ N/A
 }
 ```
 
+### EES_SRV360CameraPowerOffTimerSetting
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV206",
+  "EntityName": "EES_SRV360CameraPowerOffTimerSetting",
+  "EntityType": "",
+  "DataType": "int",
+  "ValueRange": "-1(0xFFFF) ~ 32767(0x7FFF)",
+  "InitialValue": "0",
+  "ExceptionValue": "-1(0xFFFF)",
+  "Comments": "unit - seconds"
+}
+```
+
+### EES_SRV360EanbledStatus
+
+```json
+{
+  "EntityID": "REQ_EES_ENT_SRV207",
+  "EntityName": "EES_SRV360EanbledStatus",
+  "EntityType": "",
+  "DataType": "Enumeration",
+  "ValueRange": { "disabled": 0, "enabled": 1 },
+  "InitialValue": "enabled",
+  "ExceptionValue": "disabled",
+  "Comments": ""
+}
+```
+
 ## 5 Use Cases
 
 ### 5.1 Use Case Models
 
 #### UC_EES_SRV360_000: Headunit sets SRV360 Cameras Power OFF
 
-![UC_EES_SRV360_000](./images/UC_EES_SRV360_000_analysis.png)
+![UC_EES_SRV360_000](./images/UC_EES_SRV360_000.png)
 
 #### UC_EES_SRV360_001: Headunit sets SRV360 Cameras Power ON
 
-![UC_EES_SRV360_001](./images/UC_EES_SRV360_001_analysis.png)
+![UC_EES_SRV360_001](./images/UC_EES_SRV360_001.png)
 
 ### 5.2 Business Rules
 
@@ -328,6 +359,21 @@ N/A
 | E   | [REQ_EES_SRV360_004](#34-req_ees_srv360_004) | [UC_EES_SRV360_001_RE001_POWER_ON_WHILE_SD_CARD_PLUGIN](#uc_ees_srv360_001_re001_power_on_while_sd_card_plugin)<br> [UC_EES_SRV360_000_RE003_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_SD_CARD_PLUGIN](#uc_ees_srv360_000_re003_power_off_cameras_forbidden_while_sd_card_plugin) |
 | F   | [REQ_EES_SRV360_001](#32-req_ees_srv360_001) | [UC_EES_SRV360_001_RE000_POWER_ON_CAMERAS_IN_LOW_SPEED](#uc_ees_srv360_001_re000_power_on_cameras_in_low_speed)                                                                                                                                                           |
 | G   | [REQ_EES_SRV360_003](#33-req_ees_srv360_003) | [UC_EES_SRV360_000_RE002_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_TIMER_ACTIVATED](#uc_ees_srv360_000_re002_power_off_cameras_forbidden_while_timer_activated)                                                                                                                   |
+
+#### Arbitriation Table - 2
+
+- **Inputs:**
+  - [EES_SRV360EanbledStatus](#ees_srv360eanbledstatus)
+- **Outputs:**
+  - [UC_EES_SRV360_000](#uc_ees_srv360_000-headunit-sets-srv360-cameras-power-off)
+  - [UC_EES_SRV360_001](#uc_ees_srv360_001-headunit-sets-srv360-cameras-power-on)
+
+| No. | [EES_SRV360EanbledStatus](#EES_SRV360EanbledStatus) | [UC_EES_SRV360_000](#uc_ees_srv360_000-headunit-sets-srv360-cameras-power-off) | [UC_EES_SRV360_001](#uc_ees_srv360_001-headunit-sets-srv360-cameras-power-on) |
+| --- | --------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| A   | disabled                                            | disabled                                                                       | disabled                                                                      |
+| B   | enabled                                             | enabled                                                                        | enabled                                                                       |
+
+Tha above rule has no neccessary to implement during run-time.
 
 ### 5.3 Prototype Demos
 
@@ -416,7 +462,21 @@ The camera malfunctional DTC detection should be masked while [SRV360CameraPower
 
 ### 7.9 Interoperability
 
+#### 7.9.1 User Interface Interoperability
+
 N/A
+
+#### 7.9.2 Engineering Interface Interoperability
+
+**Suggested Diagnostic Identification Entities:**
+
+| No. | Entity                                                                        | Typical Configuration | Corresponding Scenarios                                 |
+| --- | ----------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------- |
+| A   | [EES_SRV360EanbledStatus](#ees_srv360eanbledstatus)                           | disabled              | Power-off <-> Power-on functionality disabled           |
+| B   | [EES_SRV360EanbledStatus](#ees_srv360eanbledstatus)                           | enabled               | Power-off <-> Power-on functionality enabled            |
+| C   | [EES_SRV360CameraPowerOffTimerSetting](#ees_srv360camerapowerofftimersetting) | 0 (seconds)           | Disabled [REQ_EES_SRV360_003](#31-req_ees_srv360_000)   |
+| D   | [EES_SRV360CameraPowerOffTimerSetting](#ees_srv360camerapowerofftimersetting) | 900 (seconds)         | 15 minutes protection period for camera                 |
+| E   | [EES_SRV360CameraPowerOffTimerSetting](#ees_srv360camerapowerofftimersetting) | -1 (seconds)          | Only allow one time of Power-off during one power cycle |
 
 ### 7.10 Maintenance
 
