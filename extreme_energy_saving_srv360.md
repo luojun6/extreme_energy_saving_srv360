@@ -2,10 +2,12 @@
 
 ## 0 Legend
 
-| Version | Description                                       | Date       | Author |
-| ------- | ------------------------------------------------- | ---------- | ------ |
-| 1.0     | First released.                                   | 2024-04-12 | 罗均   |
-| 1.1     | Revised [Interoperability](#79-interoperability). | 2024-04-15 | 罗均   |
+| Version | Description                                                                           | Date       | Author |
+| ------- | ------------------------------------------------------------------------------------- | ---------- | ------ |
+| 1.0     | First released.                                                                       | 2024-04-12 | 罗均   |
+| 1.1     | Revised [Interoperability](#79-interoperability).                                     | 2024-04-15 | 罗均   |
+| 1.2     | Corrected the pre-condtions of [REQ_EES_SRV360_001](#32-req_ees_srv360_001).          | 2024-04-28 | 罗均   |
+| 1.3     | Added [5.3 Dynmaic Analysis (Prototype Demos)](#53-dynmaic-analysis-prototype-demos). | 2024-04-28 | 罗均   |
 
 ## 1 Overview
 
@@ -100,7 +102,8 @@ Power of SRV360 cameras should be **power-on** while **ANY** of the **Pre-condit
 
 #### 3.2.2 Pre-conditions
 
-- [SystemMode: HeadunitPowerMode](#headunitpowermode) == _`running`_
+<!-- - [SystemMode: HeadunitPowerMode](#headunitpowermode) == _`running`_ -->
+
 - [CAN Signal: VehSpdAvgDrvn](#VehSpdAvgDrvn) > ([Internal Signal: EES_SRV360CameraPowerOffSpeed](#EES_SRV360CameraPowerOffSpeed) + [Internal Signal: EES_SRV360CameraPowerOnSpeedOffset](#EES_SRV360CameraPowerOnSpeedOffset))
 - [Internal Signal: DvrSDCardPluginStatus](#DvrSDCardPluginStatus) == SD_CARD_NOT_PLUG_IN (if applicable)
 
@@ -375,7 +378,61 @@ N/A
 
 Tha above rule has no neccessary to implement during run-time.
 
-### 5.3 Prototype Demos
+### 5.3 Dynmaic Analysis (Prototype Demos)
+
+#### 5.3.1 Default State: Headunit under system power off
+
+Corresponding Realization: [UC_EES_SRV360_000_RE000_READY_TO_POWER_OFF_CAMERAS](#uc_ees_srv360_000_re000_ready_to_power_off_cameras)
+![ees_srv360_dynmaic_000](./images/ees_srv360_dynmaic_000.png)
+
+#### 5.3.2 Regular Headunit State: Headunit under system power on
+
+Corresponding Realization: [UC_EES_SRV360_000_RE000_READY_TO_POWER_OFF_CAMERAS](#uc_ees_srv360_000_re000_ready_to_power_off_cameras)
+![ees_srv360_dynmaic_001](./images/ees_srv360_dynmaic_001.png)
+
+#### 5.3.3 Regular SRV360 State: SRV360 under running while vehicle speed < 15km/h
+
+Corresponding Realization: [UC_EES_SRV360_000_RE000_READY_TO_POWER_OFF_CAMERAS](#uc_ees_srv360_000_re000_ready_to_power_off_cameras)
+![ees_srv360_dynmaic_002](./images/ees_srv360_dynmaic_002.png)
+
+#### 5.3.4 Regular SRV360 State: SRV360 exit HMI while vehicle speed > 15km/h
+
+Corresponding Realization: [UC_EES_SRV360_000_RE000_READY_TO_POWER_OFF_CAMERAS](#uc_ees_srv360_000_re000_ready_to_power_off_cameras)
+![ees_srv360_dynmaic_003](./images/ees_srv360_dynmaic_003.png)
+Note: The power status of cameras are still under **power-on**.
+
+#### 5.3.5 Energy-Saving SRV360 State: SRV360 power-off cameras while vehicle speed > 50km/h
+
+Corresponding Realization: [UC_EES_SRV360_000_RE001_POWER_OFF_CAMERAS_GRACEFULLY](#uc_ees_srv360_000_re001_power_off_cameras_gracefully)
+![ees_srv360_dynmaic_004](./images/ees_srv360_dynmaic_004.png)
+Note: The power status of cameras have been **power-off**.
+
+#### 5.3.6 Energy-Saving SRV360 State: SRV360 keeps cameras power-off while vehicle speed > (15+4)km/h
+
+Corresponding Realization: [UC_EES_SRV360_001_RE002_READY_TO_POWER_ON_CAMERAS_IN_LOW_SPEED](#uc_ees_srv360_001_re002_readY_to_power_on_cameras_in_low_speed)
+![ees_srv360_dynmaic_005](./images/ees_srv360_dynmaic_005.png)
+Note: The power status of cameras keeps **power-off**.
+
+#### 5.3.7 Energy-Saving SRV360 State: SRV360 power-on cameras while vehicle speed <= (15+4)km/h
+
+Corresponding Realization: [UC_EES_SRV360_001_RE000_POWER_ON_CAMERAS_IN_LOW_SPEED](#uc_ees_srv360_001_re000_power_on_cameras_in_low_speed)
+![ees_srv360_dynmaic_006](./images/ees_srv360_dynmaic_006.png)
+Note: The power status of cameras have been **power-on** again.
+
+#### 5.3.8 Energy-Saving SRV360 State: SD Card detected
+
+Corresponding Realization:
+
+- [UC_EES_SRV360_000_RE003_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_SD_CARD_PLUGIN](#uc_ees_srv360_000_re003_power_off_cameras_forbidden_while_sd_card_plugin)
+- [UC_EES_SRV360_001_RE001_POWER_ON_WHILE_SD_CARD_PLUGIN](#uc_ees_srv360_001_re001_power_on_while_sd_card_plugin)
+
+![ees_srv360_dynmaic_007](./images/ees_srv360_dynmaic_007.png)
+
+#### 5.3.9 Energy-Saving SRV360 State: SRV360 keeps cameras on while power-off-timer under activated
+
+Corresponding Realization: [UC_EES_SRV360_000_RE002_POWER_OFF_CAMERAS_FORBIDDEN_WHILE_TIMER_ACTIVATED](#uc_ees_srv360_000_re002_power_off_cameras_forbidden_while_timer_activated)
+![ees_srv360_dynmaic_008](./images/ees_srv360_dynmaic_008.png)
+Note: The power status of cameras keeps **power-on** even the vehicle speed > 50km/h and SD card not plug-in.
 
 ## 6 System Realization
 
@@ -409,15 +466,11 @@ Tha above rule has no neccessary to implement during run-time.
 
   - #### UC_EES_SRV360_001_RE001_POWER_ON_WHILE_SD_CARD_PLUGIN
 
-  - #### UC_EES_SRV360_001_RE002_READT_TO_POWER_ON_CAMERAS_IN_LOW_SPEED
+  - #### UC_EES_SRV360_001_RE002_READY_TO_POWER_ON_CAMERAS_IN_LOW_SPEED
 
 ![UC_EES_SRV360_001_sequence](./images/UC_EES_SRV360_001_sequence.png)
 
-### 6.3 Dynamic Analysis
-
-N/A
-
-### 6.4 Component Deployment Strategy
+### 6.3 Component Deployment Strategy
 
 ![deploy_model](./images/deploy_model.png)
 
